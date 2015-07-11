@@ -3,6 +3,7 @@
 from urllib2 import urlopen
 from bs4 import BeautifulSoup
 from car import Car
+import sys
 
 
 DEFAULT_CATEGORIES = {
@@ -23,7 +24,7 @@ def browse(url, categories):
     # Browse each page using the navigation links at the bottom
     while True:
         page = urlopen(url)
-        data = BeautifulSoup(page.read())
+        data = BeautifulSoup(page.read(), "html.parser")
         nav = data.find('ul', id='paging')
         current = nav.find('li', class_='selected').text.strip()
         nb_pages_link = nav.findAll('li')[-1].a
@@ -39,7 +40,7 @@ def browse(url, categories):
         for link in liste.findAll('a'):
             item_url = link.get('href')
             item_page = urlopen(item_url)
-            item_data = BeautifulSoup(item_page.read())
+            item_data = BeautifulSoup(item_page.read(), "html.parser")
             obj = model(item_url, item_data)
             yield obj
             # yield globals()['build_%s' % category](item_url, item_data)
@@ -53,5 +54,10 @@ def browse(url, categories):
 if __name__ == '__main__':
     URL = 'http://www.leboncoin.fr/voitures/'
     for car in browse(URL, DEFAULT_CATEGORIES):
-        car.save()
+        try:
+            car.serialize()
+            car.save()
+        except:
+            print car.ad_number()
+            print "%s: %s" % (sys.exc_info()[0], sys.exc_info()[1])
         break
