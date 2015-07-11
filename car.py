@@ -25,6 +25,3 @@ class Car(object):
         except:
             print self.ad_number()
             print "%s: %s" % (sys.exc_info()[0], sys.exc_info()[1])
-
-    def __str__(self):
-        return 'Toto'
